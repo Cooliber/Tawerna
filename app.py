@@ -25,6 +25,7 @@ from services.tavern_economy import TavernEconomySystem, ResourceType, Transacti
 from services.narrative_engine import NarrativeEngine
 from services.agent_memory import AgentMemorySystem
 from components.gsap_renderer import GSAPRenderer
+from components.agent_response_animator import AgentResponseAnimator, AgentResponse
 
 # Page configuration
 st.set_page_config(
@@ -69,7 +70,8 @@ def initialize_systems():
     economy = TavernEconomySystem()
     narrative = NarrativeEngine(economy_system=economy)
     renderer = GSAPRenderer()
-    return economy, narrative, renderer
+    agent_animator = AgentResponseAnimator()
+    return economy, narrative, renderer, agent_animator
 
 def main():
     """Main application function"""
@@ -84,7 +86,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # Initialize systems
-    economy, narrative, renderer = initialize_systems()
+    economy, narrative, renderer, agent_animator = initialize_systems()
     
     # Sidebar controls
     with st.sidebar:
@@ -123,12 +125,15 @@ def main():
         if st.button("💾 Save State"):
             save_system_state(economy, narrative)
     
-    # Main content area
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
+    # Main content area with tabs
+    tab1, tab2, tab3 = st.tabs(["🎨 Tavern Visualization", "🎭 Agent Responses", "📊 System Metrics"])
+
+    with tab1:
         # GSAP Visualization
-        st.subheader("🎨 Live Tavern Visualization")
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            st.subheader("🎨 Live Tavern Visualization")
         
         # Get current economic state for GSAP
         economic_summary = economy.get_economic_summary()
@@ -157,13 +162,102 @@ def main():
             """
         )
         
-        # Display GSAP component
-        components.html(gsap_html_with_data, height=800, scrolling=True)
-    
-    with col2:
-        # System metrics and logs
-        display_system_metrics(economy, narrative)
-        display_recent_activity(economy, narrative)
+            # Display GSAP component
+            components.html(gsap_html_with_data, height=800, scrolling=True)
+
+        with col2:
+            # System metrics and logs
+            display_system_metrics(economy, narrative)
+            display_recent_activity(economy, narrative)
+
+    with tab2:
+        # Agent Response Animation System
+        st.subheader("🎭 Agent Response Animation System")
+
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            # Create sample agents for demonstration
+            sample_agents = [
+                {"id": "karczmarz", "name": "Karczmarz", "role": "Innkeeper", "faction": "Empire"},
+                {"id": "skrytobojca", "name": "Skrytobójca", "role": "Assassin", "faction": "Chaos"},
+                {"id": "wiedzma", "name": "Wiedźma", "role": "Witch", "faction": "Undead"},
+                {"id": "czempion", "name": "Czempion", "role": "Champion", "faction": "Empire"},
+                {"id": "zwiadowca", "name": "Zwiadowca", "role": "Scout", "faction": "Elf"}
+            ]
+
+            # Render agent response system
+            agent_animator.render_agent_response_system(agents=sample_agents, height=700)
+
+        with col2:
+            st.subheader("🎮 Agent Controls")
+
+            # Test agent responses
+            if st.button("🧠 Test Thinking"):
+                response = AgentResponse(
+                    agent_id="karczmarz",
+                    agent_name="Karczmarz",
+                    response_type="thinking",
+                    content="Analyzing tavern situation...",
+                    confidence=0.8,
+                    emotion="focused",
+                    reasoning_steps=["Observing", "Analyzing", "Planning"],
+                    timestamp=datetime.now(),
+                    duration=3.0,
+                    priority=2
+                )
+                agent_animator.add_agent_response(response)
+
+            if st.button("💬 Test Speaking"):
+                response = AgentResponse(
+                    agent_id="wiedzma",
+                    agent_name="Wiedźma",
+                    response_type="speaking",
+                    content="The spirits whisper of change...",
+                    confidence=0.7,
+                    emotion="mystical",
+                    reasoning_steps=["Channeling", "Interpreting", "Speaking"],
+                    timestamp=datetime.now(),
+                    duration=4.0,
+                    priority=3
+                )
+                agent_animator.add_agent_response(response)
+
+            if st.button("🚨 Test Alert"):
+                response = AgentResponse(
+                    agent_id="skrytobojca",
+                    agent_name="Skrytobójca",
+                    response_type="alerting",
+                    content="Threat detected!",
+                    confidence=0.95,
+                    emotion="urgent",
+                    reasoning_steps=["Detecting", "Analyzing", "Alerting"],
+                    timestamp=datetime.now(),
+                    duration=1.5,
+                    priority=4
+                )
+                agent_animator.add_agent_response(response)
+
+            if st.button("🧹 Clear Responses"):
+                agent_animator.clear_agent_responses()
+
+            # Performance metrics
+            st.subheader("📊 Animation Metrics")
+            metrics = agent_animator.get_performance_metrics()
+            st.metric("FPS", f"{metrics.get('fps', 60)}")
+            st.metric("Queue Size", f"{metrics.get('queue_size', 0)}")
+
+    with tab3:
+        # System Metrics Tab
+        st.subheader("📊 Complete System Metrics")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            display_system_metrics(economy, narrative)
+
+        with col2:
+            display_recent_activity(economy, narrative)
 
 def run_economic_cycle(economy, narrative):
     """Run a complete economic cycle"""

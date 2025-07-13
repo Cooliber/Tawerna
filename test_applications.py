@@ -40,6 +40,10 @@ def run_tests() -> List[Dict]:
         {
             "name": "Main Warhammer Tavern Simulator",
             "url": "http://localhost:8503"
+        },
+        {
+            "name": "Agent Animation Test",
+            "url": "http://localhost:8504"
         }
     ]
     
